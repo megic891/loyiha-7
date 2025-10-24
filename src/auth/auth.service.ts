@@ -5,6 +5,8 @@ import { RegisterDto } from './dto/register.dto';
 import * as nodemailer from "nodemailer"
 import { LoginDto } from './dto/login.dton';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { sampleTime } from 'rxjs';
 @Injectable()
 export class AuthService {
     private transport = nodemailer.createTransport({
@@ -32,7 +34,11 @@ export class AuthService {
         subject: "hazil",
         text: "salom hazil"
         })
-        await this.authModel.create({usernmae, email, password})
+
+       
+
+        const hash = await bcrypt.hash(password, 10);
+        await this.authModel.create({usernmae, email, password:hash,role: "user"})
 
         return {message: "Register"} 
     }
@@ -44,11 +50,22 @@ export class AuthService {
         const user= await this.authModel.findOne({where: {email}})
 
         if (!user) throw new UnauthorizedException("login not found")
-        const payload = { sub: user.id, username: user.username}
+
+
+       const isMatch = await bcrypt.compare(password, user.dataValues.password);
+       if(isMatch) {
+       const payload = {sub: user.dataValues.id, username: user.dataValues.username,role:user.dataValues.role}
         const token = await this.jwtService.signAsync(payload)
 
         return {message: "succesful",token} 
+         }else{
+        return {message: "wrong password"}
+         }
+
+
     }
+
+  
 
 
 }

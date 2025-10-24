@@ -1,4 +1,5 @@
-import {  Column, Model, Table } from "sequelize-typescript";
+import {   Column, Model, Table } from "sequelize-typescript";
+import { toDefaultValue } from "sequelize/lib/utils";
 
 @Table({timestamps: true, modelName: "auth"})
 export class Auth extends Model {
@@ -13,6 +14,9 @@ export class Auth extends Model {
     password: string
     username: any;
 
+
+     @Column({allowNull: true})
+    role: string
 
 
 }
