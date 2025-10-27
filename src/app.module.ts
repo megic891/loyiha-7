@@ -1,16 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { Auth } from './auth/auth.model';
 import { UserModule } from './user/user.module';
-import { user } from './user/user.model';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from './validator/validation.pipe';
-import {ThrottlerGuard, ThrottlerModule} from '@nestjs/throttler'
-import { RolesGuard } from './auth/role.guard';
-import { SequelizeModule } from '@nestjs/sequelize';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Auth } from './shared/entities/auth.entity';
+import { User } from './shared/entities/user.entity';
+import { HttpExceptionFilter } from './filter/all-exeption.filter';
+
 @Module({
   imports: [
+
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -19,42 +26,42 @@ import { SequelizeModule } from '@nestjs/sequelize';
         },
       ],
     }),
-  ConfigModule.forRoot({envFilePath: ".env", isGlobal: true}),
-  SequelizeModule.forRoot({
-    dialect: "postgres",
-    username: "postgres",
-    host: "localhost",
-    password: "1105",
-    port: 5432,
-    database: "loyiha",
-    models: [Auth, user],
-    synchronize: true,
-    logging : false
 
-  }),
-  AuthModule,
-  UserModule
-],
-  
+ 
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '1105',
+      database: 'loyiha',
+      entities: [Auth, User],
+      synchronize: true, 
+      autoLoadEntities: true,
+      logging: false,
+    }),
+
+   
+    AuthModule,
+    UserModule,
+  ],
+
   controllers: [],
-     providers: [
+
+  providers: [
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-
-{
-  provide: APP_GUARD,
-  useClass: ThrottlerGuard
-},
-  {
-    provide: APP_GUARD,
-    useClass: RolesGuard,
-  },
-
- 
-],
-
-  
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+      {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+   
+  ],
 })
 export class AppModule {}

@@ -1,21 +1,21 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { Auth } from './auth.model';
+import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { Auth } from "src/shared/entities/auth.entity";
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Auth]),
+    TypeOrmModule.forFeature([Auth]),
+
     JwtModule.register({
-      secret: 'secret-key',
-      signOptions: { expiresIn: '24h' },
+      secret: "secret-key",
+      signOptions: { expiresIn: "24h" },
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [JwtModule, AuthService], 
+  exports: [JwtModule, AuthService],
 })
 export class AuthModule {}
-
