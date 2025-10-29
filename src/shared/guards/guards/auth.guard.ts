@@ -7,7 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 
 import { Request } from 'express';
-import { jwtConstants } from 'src/auth/auth.constants';
+import { jwtConstants } from 'src/module/module/auth.constants';
+
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -39,4 +40,4 @@ export class AuthGuard implements CanActivate {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
-}
+} 
